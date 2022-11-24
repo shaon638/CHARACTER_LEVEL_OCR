@@ -77,15 +77,16 @@ if mode == "train":
 
 if mode == "Test":
     # Test data address
-    test_image_dir = "/ssd_scratch/cvit/shaon/Data/test"
+    test_image_dir = "/ssd_scratch/cvit/shaon/Data1/test"
+
 
     # Test dataloader parameters
     image_size = 28
-    batch_size = 100
+    batch_size = 1
     num_workers = 4
 
     # How many iterations to print the testing result
     test_print_frequency = 20
 
     model_weights_path = "/ssd_scratch/cvit/shaon/ResNet50_FineTune/resnet50/epoch_191.pth.tar"
-    results_file_path = "/home2/shaon/predicted_labels_2"
+    results_file_path = "/home2/shaon/predicted_labels"

@@ -54,9 +54,9 @@ class ImageDataset(Dataset):
     def __init__(self, image_dir: str, image_size: int, mean: list, std: list, mode: str) -> None:
         super(ImageDataset, self).__init__()
         # Iterate over all image paths
-        self.image_file_paths = glob(f"{image_dir}/*/*")
+        self.image_file_paths = glob(f"{image_dir}/*")
         # Form image class label pairs by the folder where the image is located
-        _, self.class_to_idx = find_classes(image_dir)
+        # _, self.class_to_idx = find_classes(image_dir)
         self.image_size = image_size
         self.mode = mode
         self.delimiter = delimiter
@@ -86,7 +86,7 @@ class ImageDataset(Dataset):
         # Read a batch of image data
         if image_name.split(".")[-1].lower() in IMG_EXTENSIONS:
             image = cv2.imread(self.image_file_paths[batch_index])
-            target = self.class_to_idx[image_dir]
+            # target = self.class_to_idx[image_dir]
         else:
             raise ValueError(f"Unsupported image extensions, Only support `{IMG_EXTENSIONS}`, "
                              "please check the image file extensions.")
@@ -108,7 +108,8 @@ class ImageDataset(Dataset):
         tensor = self.post_transform(tensor)
         image_path = os.path.join(image_dir, image_name)
 
-        return {"image": tensor, "target": target, "path" :  image_path, "dir" : image_dir}
+        # return {"image": tensor, "target": target, "path" :  image_path, "dir" : image_dir}
+        return {"image": tensor,  "path" :  image_path, "dir" : image_dir}
 
     def __len__(self) -> int:
         return len(self.image_file_paths)

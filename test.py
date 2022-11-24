@@ -103,6 +103,7 @@ def main() -> None:
             image_name = batch_data["path"]
             # Get batch size
             batch_size = images.size(0)
+            print(batch_size)
 
             # Inference
             output = resnet_model(images)
@@ -122,7 +123,8 @@ def main() -> None:
             filename = str(count)+ ".txt"
             fp = open(os.path.join(datafile_path,filename),"w")
             fp.writelines(map_list)
-            fp.close()
+            # fp.close()
+            count += 1
 
 
             batch_data = test_prefetcher.next()
