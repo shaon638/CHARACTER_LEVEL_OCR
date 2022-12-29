@@ -65,6 +65,7 @@ def main():
             best_acc1,
             optimizer,
             scheduler)
+        # print(resnet_model)
         print(f"Loaded `{config.pretrained_model_weights_path}` pretrained model weights successfully.")
     else:
         print("Pretrained model weights not found.")
@@ -85,8 +86,8 @@ def main():
         print("Resume training model not found. Start training from scratch.")
 
     # Create a experiment results
-    samples_dir = os.path.join("/ssd_scratch/cvit/shaon/ResNet50_FineTune/samples", config.exp_name)
-    results_dir = os.path.join("/ssd_scratch/cvit/shaon/ResNet50_FineTune/results", config.exp_name)
+    samples_dir = os.path.join("/ssd_scratch/cvit/shaon/samples", config.exp_name)
+    results_dir = os.path.join("/ssd_scratch/cvit/shaon/results", config.exp_name)
     make_directory(samples_dir)
     make_directory(results_dir)
 
@@ -123,29 +124,29 @@ def main():
 
 def load_dataset() -> [CUDAPrefetcher, CUDAPrefetcher]:
     # Load train, test and valid datasets
-    train_dataset = ImageDataset(config.train_image_dir,
-                                 config.image_size,
+    train_dataset = ImageDataset("/ssd_scratch/cvit/shaon/finetuned_data/data",
+                                 28,
                                  config.model_mean_parameters,
                                  config.model_std_parameters,
                                  "Train")
-    valid_dataset = ImageDataset(config.valid_image_dir,
-                                 config.image_size,
+    valid_dataset = ImageDataset("/ssd_scratch/cvit/shaon/finetuned_data/val",
+                                 28,
                                  config.model_mean_parameters,
                                  config.model_std_parameters,
                                  "Valid")
 
     # Generator all dataloader
     train_dataloader = DataLoader(train_dataset,
-                                  batch_size=config.batch_size,
+                                  batch_size=500,
                                   shuffle=True,
-                                  num_workers=config.num_workers,
+                                  num_workers=4,
                                   pin_memory=True,
                                   drop_last=True,
                                   persistent_workers=True)
     valid_dataloader = DataLoader(valid_dataset,
-                                  batch_size=config.batch_size,
+                                  batch_size=500,
                                   shuffle=True,
-                                  num_workers=config.num_workers,
+                                  num_workers=4,
                                   pin_memory=True,
                                   drop_last=False,
                                   persistent_workers=True)
@@ -175,11 +176,23 @@ def define_loss() -> nn.CrossEntropyLoss:
 
 
 def define_optimizer(model) -> optim.SGD:
+    # count = 0
+    # for param in model.parameters():
+    #     if count <= 150:
+    #         param.requires_grad = False
+        
+            
+    #     count +=1 
+        # print(param.shape)
+        
+    # print("count:" ,count)
     optimizer = optim.SGD(model.parameters(),
                           lr=config.model_lr,
                           momentum=config.model_momentum,
                           weight_decay=config.model_weight_decay)
-
+    # print(model.parameters())
+    # for param1 in model.parameters():
+    #     print(param1)
     return optimizer
 
 
@@ -267,7 +280,7 @@ def train(
         end = time.time()
 
         # Write the data during training to the training log file
-        if batch_index % config.train_print_frequency == 0:
+        if batch_index % 200 == 0:
             # Record loss during training and output to file
             writer.add_scalar("Train/Loss", loss.item(), batch_index + epoch * batches + 1)
             progress.display(batch_index + 1)

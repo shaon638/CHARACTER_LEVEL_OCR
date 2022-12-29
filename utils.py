@@ -117,18 +117,25 @@ def make_divisible(v: float, divisor: int, min_value: Optional[int] = None) -> i
 def save_checkpoint(
         state_dict: dict,
         file_name: str,
-        samples_dir: str,
+        # samples_dir: str,
         results_dir: str,
         is_best: bool = False,
         is_last: bool = False,
 ) -> None:
-    checkpoint_path = os.path.join(samples_dir, file_name)
-    torch.save(state_dict, checkpoint_path)
+    # checkpoint_path = os.path.join(result_dir, file_name)
+    # torch.save(state_dict, checkpoint_path)
 
     if is_best:
-        shutil.copyfile(checkpoint_path, os.path.join(results_dir, "best.pth.tar"))
+        # print(file_name)
+        checkpoint_path = os.path.join(results_dir, file_name)
+        torch.save(state_dict, checkpoint_path)
+        # shutil.copyfile(checkpoint_path, os.path.join(results_dir, "best.pth.tar"))
     if is_last:
-        shutil.copyfile(checkpoint_path, os.path.join(results_dir, "last.pth.tar"))
+        # print(file_name)
+        checkpoint_path = os.path.join(results_dir, file_name)
+        torch.save(state_dict, checkpoint_path)
+        # torch.save(state_dict, os.path.join(results_dir, "last.pth.tar"))
+        # shutil.copyfile(checkpoint_path, os.path.join(results_dir, "last.pth.tar"))
 
 
 class Summary(Enum):

@@ -33,35 +33,35 @@ model_std_parameters = [0.229, 0.224, 0.225]
 # Model number class
 model_num_classes = 63
 # Current configuration parameter method
-mode = "Test"
+mode = "Train"
 # Experiment name, easy to save weights and log files
-exp_name = f"{model_arch_name}-MnistResNet_finetune1"
+exp_name = f"{model_arch_name}-MnistResNet_check"
 
-if mode == "train":
+if mode == "Train":
     # Dataset address
-    train_image_dir = "/ssd_scratch/cvit/shaon/Data/train"
-    valid_image_dir = "/ssd_scratch/cvit/shaon/Data/val"
+    train_image_dir = "/ssd_scratch/cvit/shaon/finetuned_data/data"
+    valid_image_dir = "/ssd_scratch/cvit/shaon/finetuned_data/val"
 
     image_size = 28
-    batch_size = 200
+    batch_size = 500
     num_workers = 4
 
     # The address to load the pretrained model
-    pretrained_model_weights_path = "/ssd_scratch/cvit/shaon/ResNet50_FineTune/results/resnet50-MnistResNet_finetune/last.pth.tar"
+    pretrained_model_weights_path = "/ssd_scratch/cvit/shaon/resnet50_ImgClass_Mnist_degradation/resnet50/last.pth.tar"
 
 
     # Incremental training and migration training
-    resume = "/ssd_scratch/cvit/shaon/ResNet50_FineTune/samples/resnet50-MnistResNet_finetune/epoch_50.pth.tar"
+    resume = ""
 
     # Total num epochs
-    epochs = 200
+    epochs = 5000
 
     # Loss parameters
     loss_label_smoothing = 0.1
     loss_weights = 1.0
 
     # Optimizer parameter
-    model_lr = 0.001
+    model_lr = 0.0001
     model_momentum = 0.9
     model_weight_decay = 2e-05
     model_ema_decay = 0.99998
@@ -77,16 +77,16 @@ if mode == "train":
 
 if mode == "Test":
     # Test data address
-    test_image_dir = "/ssd_scratch/cvit/shaon/Data1/test"
+    test_image_dir = "/ssd_scratch/cvit/shaon/finetuned_data/data"
 
 
     # Test dataloader parameters
     image_size = 28
-    batch_size = 1
+    batch_size = 500
     num_workers = 4
 
     # How many iterations to print the testing result
     test_print_frequency = 20
 
-    model_weights_path = "/ssd_scratch/cvit/shaon/ResNet50_FineTune/resnet50/epoch_191.pth.tar"
+    model_weights_path = "/ssd_scratch/cvit/shaon/resnet50_ImgClass_Mnist_degradation/resnet50/last.pth.tar"
     results_file_path = "/home2/shaon/predicted_labels"

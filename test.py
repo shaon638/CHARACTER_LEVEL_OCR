@@ -22,7 +22,7 @@ def build_model() -> nn.Module:
 
 
 def load_dataset() -> CUDAPrefetcher:
-    test_dataset = ImageDataset(config.test_image_dir,
+    test_dataset = ImageDataset("/ssd_scratch/cvit/shaon/Data/test",
                                 config.image_size,
                                 config.model_mean_parameters,
                                 config.model_std_parameters,
@@ -47,7 +47,7 @@ def main() -> None:
     print(f"Build `{config.model_arch_name}` model successfully.")
 
     # Load model weights
-    resnet_model, _, _, _, _, _ = load_state_dict(resnet_model, config.model_weights_path)
+    resnet_model, _, _, _, _, _ = load_state_dict(resnet_model, "/ssd_scratch/cvit/shaon/results/resnet50-MnistResNet_check/epoch_5000.pth.tar")
     #print(f"Load `{config.model_arch_name}` "
           #f"model weights `{os.path.abspath(config.model_weights_path)}` successfully.")
 
@@ -61,14 +61,20 @@ def main() -> None:
 
 
     batch_index = 0
+    batch_time = AverageMeter("Time", ":6.3f", Summary.NONE)
+    acc1 = AverageMeter("Acc@1", ":6.2f", Summary.AVERAGE)
+    acc5 = AverageMeter("Acc@5", ":6.2f", Summary.AVERAGE)
+    progress = ProgressMeter(batches, [batch_time, acc1, acc5], prefix=f"Test: ")
 
     # Initialize the data loader and load the first batch of data
     test_prefetcher.reset()
     batch_data = test_prefetcher.next()
-    datafile_path = config.results_file_path
+    datafile_path = "/home2/shaon/predicted_labels"
+    accuracy_file_path = "/home2/shaon/accuracy_withfinetune"
     # Get the initialization test time
     end = time.time()
     count = 1
+    count1 = 1
     # image_dir = "/ssd_scratch/cvit/shaon/ImageNet_test/test"
     class_to_idx = {'0': 0, '1': 1, '10': 2, '11': 3, '12': 4, '13': 5, '14': 6, '15': 7, '16': 8, '17': 9, '18': 10, '19': 11, 
                     '2': 12, '20': 13, '21': 14, '22': 15, '23': 16, '24': 17, '25': 18, '26': 19, '27': 20, '28': 21, '29': 22, '3': 23, 
@@ -97,9 +103,11 @@ def main() -> None:
     with torch.no_grad():
         while batch_data is not None:
             map_list = []
+            accuracy_list = []
             # Transfer in-memory data to CUDA devices to speed up training
             images = batch_data["image"].to(device=config.device, non_blocking=True)
-            # target = batch_data["target"].to(device=config.device, non_blocking=True)
+
+            target = batch_data["target"].to(device=config.device, non_blocking=True)
             image_name = batch_data["path"]
             # Get batch size
             batch_size = images.size(0)
@@ -125,10 +133,35 @@ def main() -> None:
             fp.writelines(map_list)
             # fp.close()
             count += 1
+            # measure accuracy and record loss
+            top1, top5 = accuracy(output, target, topk=(1, 5))
+            acc1.update(top1[0].item(), batch_size)
+            acc5.update(top5[0].item(), batch_size)
 
+            # Calculate the time it takes to fully train a batch of data
+            batch_time.update(time.time() - end)
+            end = time.time()
+
+            # Write the data during training to the training log file
+            #if batch_index % config.test_print_frequency == 0:
+            progress.display(batches)
+            print("Accuracy :" , top1[0].item())
+            line_acc = "Accuracy"+":" +" "+str(top1[0].item())+"\n"
+            accuracy_list.append(line_acc)
+            acc_filename = str(count1)+ ".txt"
+
+            # acc = str()
+            fp = open(os.path.join(accuracy_file_path, acc_filename),"w")
+            fp.writelines(accuracy_list)
+            count1 +=1
+
+            batch_index += 1
 
             batch_data = test_prefetcher.next()
     print(count)
 
+    # print metrics
+    print(f"Acc@1 error: {100 - acc1.avg:.2f}%")
+    print(f"Acc@5 error: {100 - acc5.avg:.2f}%")
 if __name__ == "__main__":
     main()

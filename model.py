@@ -188,7 +188,7 @@ class ResNet(nn.Module):
                     self.base_channels,
                 )
             )
-
+        
         return nn.Sequential(*layers)
 
     def forward(self, x: Tensor) -> Tensor:
@@ -237,6 +237,7 @@ def resnet34(**kwargs: Any) -> ResNet:
 
 def resnet50(**kwargs: Any) -> ResNet:
     model = ResNet([3, 4, 6, 3], _Bottleneck, **kwargs)
+
 
     return model
 
